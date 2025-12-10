@@ -22,20 +22,7 @@
 6. Check the **Singleton** checkbox
 7. Click **Add**
 
-**Option B: Install as Plugin**
-
-1. Copy the entire `godot-sdk` folder to your project's `addons/` directory:
-   ```
-   your-project/
-   └── addons/
-       └── gameglass/
-           ├── GameGlass.gd
-           ├── plugin.cfg
-           └── README.md
-   ```
-2. In Godot, go to **Project → Project Settings → Plugins**
-3. Find "GameGlass" in the list
-4. Enable it by checking the checkbox
+**Note:** The SDK is designed to be used as an autoload singleton, not as a plugin. This is the recommended and most reliable method.
 
 ### Step 3: Get Your API Key
 
