@@ -17,12 +17,12 @@ That's it! The SDK is now available globally as `GameGlass` throughout your proj
 
 ## Quick Start
 
-### 1. Get Your API Key
+### 1. Get Your API Key and Secret
 
 1. Sign up at [gameglass.live](https://gameglass.live)
 2. Create a game in your dashboard
 3. Generate an API key
-4. Copy the API key
+4. **Important:** Copy both the API key AND the API secret immediately - you won't be able to see the secret again!
 
 ### 2. Initialize the SDK
 
@@ -30,8 +30,9 @@ In your game's main scene or initialization script:
 
 ```gdscript
 # In _ready() or game initialization
+# You need both the API key and secret from your dashboard
 func _ready():
-    GameGlass.initialize("your-api-key-here")
+    GameGlass.initialize("your-api-key-here", "your-api-secret-here")
 ```
 
 ### 3. Track Events
@@ -82,16 +83,17 @@ GameGlass.set_user_property("game_version", "1.2.3")
 
 ## API Reference
 
-### `initialize(key: String)`
+### `initialize(key: String, secret: String = "")`
 
-Initialize the SDK with your API key. Call this once when your game starts.
+Initialize the SDK with your API key and secret. Call this once when your game starts.
 
 **Parameters:**
 - `key`: Your GameGlass API key
+- `secret`: Your GameGlass API secret (optional for now, but recommended)
 
 **Example:**
 ```gdscript
-GameGlass.initialize("gg_live_abc123xyz")
+GameGlass.initialize("gg_live_abc123xyz", "your-secret-here")
 ```
 
 ### `track_event(event_type: String, properties: Dictionary = {})`
@@ -184,8 +186,8 @@ Here's a complete example of integrating GameGlass into a Godot game:
 extends Node
 
 func _ready():
-    # Initialize GameGlass
-    GameGlass.initialize("your-api-key-here")
+    # Initialize GameGlass with both API key and secret
+    GameGlass.initialize("your-api-key-here", "your-api-secret-here")
     
     # Set user properties
     GameGlass.set_user_property("platform", OS.get_name())
@@ -221,6 +223,65 @@ func _on_ccu_timer():
 func _exit_tree():
     # Track session end when game closes
     GameGlass.track_session_end()
+```
+
+## Common Game Scenarios
+
+For comprehensive examples of tracking different game scenarios, see [examples_comprehensive.gd](examples_comprehensive.gd) which includes examples for:
+
+- **Button clicks and UI interactions** - Track button presses, menu opens, settings changes
+- **Scene/level loading** - Track when scenes or levels are loaded
+- **Win/lose/draw scenarios** - Track game outcomes with detailed context
+- **Player actions** - Track jumps, item collection, deaths, position data
+- **Combat events** - Track enemy defeats, boss battles, weapon switches
+- **Progression** - Track level ups, achievements, milestones, checkpoints
+- **Economy** - Track purchases, currency earned, in-game transactions
+- **Tutorial/onboarding** - Track tutorial progress and completion
+- **Errors and crashes** - Track errors for debugging
+- **Social features** - Track sharing, ad interactions
+
+Here are some quick examples:
+
+### Button Clicks
+```gdscript
+func _on_button_clicked(button_name: String, button_index: int):
+    GameGlass.track_event("button_clicked", {
+        "button_name": button_name,
+        "button_index": button_index,
+        "scene": get_tree().current_scene.name
+    })
+```
+
+### Scene/Level Loading
+```gdscript
+func _on_scene_changed(new_scene_name: String):
+    GameGlass.track_event("scene_loaded", {
+        "scene_name": new_scene_name,
+        "previous_scene": previous_scene_name
+    })
+```
+
+### Win/Lose/Draw
+```gdscript
+func on_player_wins(score: int, time_seconds: float, level: int):
+    GameGlass.track_event("player_wins", {
+        "score": score,
+        "time_seconds": time_seconds,
+        "level": level
+    })
+
+func on_player_loses(score: int, level: int, cause: String):
+    GameGlass.track_event("player_loses", {
+        "score": score,
+        "level": level,
+        "cause": cause  # e.g., "timeout", "no_lives", "caught"
+    })
+
+func on_game_draw():
+    GameGlass.track_event("game_draw", {
+        "score": current_score,
+        "time_seconds": elapsed_time
+    })
 ```
 
 ## Troubleshooting
