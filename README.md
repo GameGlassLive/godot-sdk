@@ -4,20 +4,16 @@ Analytics SDK for integrating GameGlass into your Godot game. Track events, moni
 
 ## Installation
 
-### Option 1: Copy Files Manually
+### Recommended: Autoload Singleton
 
-1. Copy the `GameGlass.gd` file to your Godot project
+1. Copy the `GameGlass.gd` file to your Godot project (e.g., `res://scripts/GameGlass.gd`)
 2. In Godot, go to **Project → Project Settings → Autoload**
-3. Add `GameGlass.gd` as an autoload singleton:
-   - **Node Name**: `GameGlass`
-   - **Path**: `res://path/to/GameGlass.gd`
-   - Check **Singleton**
+3. Click the folder icon next to "Path" and select `GameGlass.gd`
+4. Set the **Node Name** to: `GameGlass` (must match exactly, case-sensitive)
+5. Check the **Singleton** checkbox
+6. Click **Add**
 
-### Option 2: Add as Plugin (Recommended)
-
-1. Copy the entire `godot-sdk` folder to your project's `addons/` directory
-2. In Godot, go to **Project → Project Settings → Plugins**
-3. Enable the "GameGlass" plugin
+That's it! The SDK is now available globally as `GameGlass` throughout your project.
 
 ## Quick Start
 
