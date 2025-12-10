@@ -19,6 +19,8 @@ var user_properties: Dictionary = {}
 
 var _http_client: HTTPRequest
 var _batch_timer: Timer
+var _is_requesting: bool = false
+var _pending_batch: Array = []
 
 func _ready():
 	# Create HTTP client
@@ -91,6 +93,13 @@ func track_ccu(count: int) -> void:
 		push_warning("GameGlass: Not initialized. Call initialize() first.")
 		return
 	
+	# If a request is in progress, queue the CCU as an event instead
+	if _is_requesting:
+		track_event("ccu_update", {"ccu": count})
+		return
+	
+	_is_requesting = true
+	
 	var url = API_BASE_URL + "/metrics/ccu"
 	var headers = [
 		"X-API-Key: " + api_key,
@@ -105,7 +114,11 @@ func track_ccu(count: int) -> void:
 	
 	var error = _http_client.request(url, headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
+		_is_requesting = false
 		push_error("GameGlass: Failed to send CCU request: " + str(error))
+		# Fallback to event tracking if CCU endpoint fails
+		track_event("ccu_update", {"ccu": count})
+		_try_send_pending()
 
 ## Set a user property that will be included in all events
 ## key: Property name
@@ -151,12 +164,24 @@ func _flush_queue() -> void:
 	var events_to_send = event_queue.duplicate()
 	event_queue.clear()
 	
+	# If a request is already in progress, queue this batch
+	if _is_requesting:
+		_pending_batch.append_array(events_to_send)
+		return
+	
 	# Send batch
 	_send_batch(events_to_send)
 
 func _send_batch(events: Array) -> void:
 	if events.is_empty():
 		return
+	
+	# If already requesting, queue this batch
+	if _is_requesting:
+		_pending_batch.append_array(events)
+		return
+	
+	_is_requesting = true
 	
 	var url = API_BASE_URL + "/events/batch"
 	var headers = [
@@ -174,17 +199,31 @@ func _send_batch(events: Array) -> void:
 	
 	var error = _http_client.request(url, headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
+		_is_requesting = false
 		push_error("GameGlass: Failed to send batch request: " + str(error))
 		# Re-add events to queue on failure (with limit to prevent memory issues)
 		if event_queue.size() < 1000:
 			event_queue.append_array(events)
+		# Try to send pending batch if any
+		_try_send_pending()
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	_is_requesting = false
+	
 	if response_code >= 200 and response_code < 300:
 		print("GameGlass: Request successful (", response_code, ")")
 	else:
 		var response_body = body.get_string_from_utf8()
 		push_error("GameGlass: Request failed (", response_code, "): ", response_body)
+	
+	# Try to send any pending batches
+	_try_send_pending()
+
+func _try_send_pending() -> void:
+	if not _pending_batch.is_empty() and not _is_requesting:
+		var batch = _pending_batch.duplicate()
+		_pending_batch.clear()
+		_send_batch(batch)
 
 func _generate_session_id() -> String:
 	# Generate a unique session ID
