@@ -1,12 +1,14 @@
 ## Example: How to use GameGlass SDK in your Godot game
 ## This is a reference example - adapt it to your game's structure
+## For more comprehensive examples, see examples_comprehensive.gd
 
 extends Node
 
 func _ready():
 	# 1. Initialize GameGlass (do this once when your game starts)
-	# Replace "your-api-key-here" with your actual API key from the dashboard
-	GameGlass.initialize("your-api-key-here")
+	# Replace with your actual API key and secret from the dashboard
+	# Important: Copy both values when creating your API key - you won't see the secret again!
+	GameGlass.initialize("your-api-key-here", "your-api-secret-here")
 	
 	# 2. Set user properties that will be included in all events
 	GameGlass.set_user_property("platform", OS.get_name())
