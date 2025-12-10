@@ -11,6 +11,7 @@ const BATCH_SIZE = 50
 const BATCH_INTERVAL = 60.0  # seconds
 
 var api_key: String = ""
+var api_secret: String = ""
 var session_id: String = ""
 var is_initialized: bool = false
 var event_queue: Array = []
@@ -32,14 +33,16 @@ func _ready():
 	_batch_timer.autostart = true
 	add_child(_batch_timer)
 
-## Initialize the SDK with your API key
+## Initialize the SDK with your API key and secret
 ## Call this once when your game starts
-func initialize(key: String) -> void:
+## Note: You can use just the key for now, but secret will be required in future versions
+func initialize(key: String, secret: String = "") -> void:
 	if key.is_empty():
 		push_error("GameGlass: API key cannot be empty")
 		return
 	
 	api_key = key
+	api_secret = secret
 	session_id = _generate_session_id()
 	is_initialized = true
 	
@@ -90,9 +93,11 @@ func track_ccu(count: int) -> void:
 	
 	var url = API_BASE_URL + "/metrics/ccu"
 	var headers = [
-		"Authorization: Bearer " + api_key,
+		"X-API-Key: " + api_key,
 		"Content-Type: application/json"
 	]
+	if not api_secret.is_empty():
+		headers.append("X-API-Secret: " + api_secret)
 	
 	var body = JSON.stringify({
 		"ccu": count
@@ -155,9 +160,11 @@ func _send_batch(events: Array) -> void:
 	
 	var url = API_BASE_URL + "/events/batch"
 	var headers = [
-		"Authorization: Bearer " + api_key,
+		"X-API-Key: " + api_key,
 		"Content-Type: application/json"
 	]
+	if not api_secret.is_empty():
+		headers.append("X-API-Secret: " + api_secret)
 	
 	var payload = {
 		"events": events
