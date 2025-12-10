@@ -24,14 +24,14 @@
 
 **Note:** The SDK is designed to be used as an autoload singleton, not as a plugin. This is the recommended and most reliable method.
 
-### Step 3: Get Your API Key
+### Step 3: Get Your API Key and Secret
 
 1. Sign up at [gameglass.live](https://gameglass.live) (if you haven't already)
 2. Log in to your dashboard
 3. Create a new game (or select an existing one)
 4. Go to **API Keys** section
 5. Click **Generate New API Key**
-6. Copy the API key (you'll need it in the next step)
+6. **Important:** Copy both the API key AND the API secret immediately - you won't be able to see the secret again!
 
 ### Step 4: Initialize in Your Game
 
@@ -39,9 +39,11 @@ In your main game script (usually your main scene's `_ready()` function):
 
 ```gdscript
 func _ready():
-    # Replace "your-api-key-here" with your actual API key
-    GameGlass.initialize("your-api-key-here")
+    # Replace with your actual API key and secret from the dashboard
+    GameGlass.initialize("your-api-key-here", "your-api-secret-here")
 ```
+
+**Note:** The API secret is required for authentication. Make sure to copy both values when creating your API key.
 
 That's it! The SDK is now ready to use.
 
@@ -51,12 +53,14 @@ Add this to test that everything works:
 
 ```gdscript
 func _ready():
-    GameGlass.initialize("your-api-key-here")
+    GameGlass.initialize("your-api-key-here", "your-api-secret-here")
     
     # Test event - this should appear in your dashboard
     GameGlass.track_event("test_event", {
         "message": "SDK is working!"
     })
+    # Manually flush to send immediately (for testing)
+	GameGlass.flush()
 ```
 
 Then check your GameGlass dashboard - you should see the test event appear within a few seconds.
@@ -77,10 +81,11 @@ Then check your GameGlass dashboard - you should see the test event appear withi
 
 ### Events not appearing in dashboard
 
-- Verify your API key is correct
+- Verify your API key and secret are correct
 - Check that your game is created in the dashboard
 - Look for error messages in the Godot console
 - Ensure you have an internet connection
+- Make sure you're passing both the API key and secret to `initialize()`
 
 ### Can't find GameGlass in autoload
 
@@ -92,7 +97,6 @@ Then check your GameGlass dashboard - you should see the test event appear withi
 
 Need help? 
 - 📧 [Contact Support](https://gameglass.live/contact)
-- 💬 [Join Discord](https://discord.gg/gameglass)
 - 📚 [Documentation](https://gameglass.live/docs)
 - 💬 [Forum](https://gameglass.live/forum)
 
